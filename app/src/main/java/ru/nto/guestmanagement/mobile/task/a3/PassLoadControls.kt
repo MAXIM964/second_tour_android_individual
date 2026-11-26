@@ -38,69 +38,63 @@ fun PassLoadControls(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    @Composable
-    fun PassLoadControls(
-        state: PassScreenState,
-        onRefresh: () -> Unit,
-        onRetry: () -> Unit,
-        modifier: Modifier = Modifier
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            when (state) {
-                is PassScreenState.InitialLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.testTag(TestIds.PASS_LOADING)
-                    )
+        when (state) {
+            is PassScreenState.InitialLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.testTag(TestIds.PASS_LOADING)
+                )
+            }
+
+            is PassScreenState.InitialError -> {
+                Text(
+                    text = state.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.testTag(TestIds.PASS_ERROR)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onRetry,
+                    modifier = Modifier.testTag(TestIds.PASS_RETRY)
+                ) {
+                    Text("Повторить")
                 }
-                is PassScreenState.InitialError -> {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.testTag(TestIds.PASS_ERROR)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            is PassScreenState.Content -> {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Button(
-                        onClick = onRetry,
-                        modifier = Modifier.testTag(TestIds.PASS_RETRY)
+                        onClick = onRefresh,
+                        enabled = !state.isRefreshing,
+                        modifier = Modifier.testTag(TestIds.PASS_REFRESH)
                     ) {
-                        Text("Повторить")
-                    }
-                }
-                is PassScreenState.Content -> {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Button(
-                            onClick = onRefresh,
-                            enabled = !state.isRefreshing,
-                            modifier = Modifier.testTag(TestIds.PASS_REFRESH)
-                        ) {
-                            Text("Обновить")
-                        }
-
-                        if (state.isRefreshing) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            CircularProgressIndicator(
-                                modifier = Modifier.testTag(TestIds.PASS_LOADING)
-                            )
-                        }
+                        Text("Обновить")
                     }
 
-                    if (state.isOffline && !state.isRefreshing) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Нет связи",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.testTag(TestIds.PASS_OFFLINE)
+                    if (state.isRefreshing) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.testTag(TestIds.PASS_LOADING)
                         )
                     }
+                }
+
+                if (state.isOffline && !state.isRefreshing) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Нет связи",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.testTag(TestIds.PASS_OFFLINE)
+                    )
                 }
             }
         }
